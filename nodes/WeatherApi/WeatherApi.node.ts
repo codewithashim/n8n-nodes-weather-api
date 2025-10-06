@@ -377,9 +377,36 @@ export class WeatherApi implements INodeType {
 					queryParams.exclude = excludeParts.join(',');
 				}
 
+				// Resolve endpoint per operation
+				let endpoint = '';
+				switch (operation) {
+					case 'getCurrent':
+						endpoint = '/weather';
+						break;
+					case 'getForecast':
+						endpoint = '/forecast';
+						break;
+					case 'getHourly':
+						// OpenWeather hourly is via One Call; fallback to forecast endpoint if used
+						endpoint = '/forecast';
+						break;
+					case 'getAlerts':
+						endpoint = '/onecall';
+						break;
+					default:
+						endpoint = '/weather';
+				}
+
+				// Compose absolute URL; fall back if Base URL is unset in credentials
+				const creds: any = await this.getCredentials('weatherApi');
+				const baseUrlFallback = resource === 'getAlerts' || resource === 'alerts' ? 'https://api.openweathermap.org/data/3.0' : 'https://api.openweathermap.org/data/2.5';
+				const baseUrl = (creds && typeof creds.baseUrl === 'string' && creds.baseUrl.trim()) ? (creds.baseUrl as string).replace(/\/$/, '') : baseUrlFallback;
+				const absoluteUrl = `${baseUrl}${endpoint}`;
+
 				// Make the API request
 				const response = await this.helpers.requestWithAuthentication.call(this, 'weatherApi', {
 					method: 'GET',
+					url: absoluteUrl,
 					qs: queryParams,
 				});
 

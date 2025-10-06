@@ -25,7 +25,7 @@ export class WeatherApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'https://api.openweathermap.org/data/3.0',
+			default: 'https://api.openweathermap.org/data/2.5',
 			description: 'Base URL for the Weather API',
 			required: true,
 		},
@@ -85,10 +85,9 @@ export class WeatherApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials.baseUrl}}',
-			url: '/onecall',
+			url: '/weather',
 			qs: {
-				lat: 33.44,
-				lon: -94.04,
+				q: 'London',
 				appid: '={{$credentials.apiKey}}',
 				units: '={{$credentials.units}}',
 				lang: '={{$credentials.language}}',
