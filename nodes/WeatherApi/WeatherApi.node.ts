@@ -144,6 +144,26 @@ export class WeatherApi implements INodeType {
 				],
 				default: 'getAlerts',
 			},
+            {
+                displayName: 'Exclude Parts',
+                name: 'excludeParts',
+                type: 'multiOptions',
+                displayOptions: {
+                    show: {
+                        resource: ['alerts'],
+                        operation: ['getAlerts'],
+                    },
+                },
+                options: [
+                    { name: 'Current', value: 'current' },
+                    { name: 'Minutely', value: 'minutely' },
+                    { name: 'Hourly', value: 'hourly' },
+                    { name: 'Daily', value: 'daily' },
+                    { name: 'Alerts', value: 'alerts' },
+                ],
+                default: [],
+                description: 'Exclude parts of the response to reduce payload',
+            },
 			{
 				displayName: 'Location Type',
 				name: 'locationType',
@@ -302,10 +322,16 @@ export class WeatherApi implements INodeType {
 				const resource = this.getNodeParameter('resource', i) as string;
 				const operation = this.getNodeParameter('operation', i) as string;
 				const locationType = this.getNodeParameter('locationType', i) as string;
-				const additionalOptions = this.getNodeParameter('additionalOptions', i) as any;
+				// Note: additionalOptions reserved for future One Call params
+				const excludeParts = resource === 'alerts' ? (this.getNodeParameter('excludeParts', i, []) as string[]) : [];
 
 				// Build query parameters based on location type
 				const queryParams: any = {};
+
+				// One Call (alerts) requires coordinates
+				if (resource === 'alerts' && locationType !== 'coordinates') {
+					throw new NodeOperationError(this.getNode(), 'For Alerts (One Call 3.0), set Location Type to "Coordinates".');
+				}
 
 				switch (locationType) {
 					case 'city': {
@@ -320,7 +346,7 @@ export class WeatherApi implements INodeType {
 					case 'coordinates': {
 						const latitude = this.getNodeParameter('latitude', i) as number;
 						const longitude = this.getNodeParameter('longitude', i) as number;
-						if (!latitude || !longitude) {
+						if (latitude === undefined || longitude === undefined) {
 							throw new NodeOperationError(this.getNode(), 'Both latitude and longitude are required');
 						}
 						queryParams.lat = latitude;
@@ -346,18 +372,9 @@ export class WeatherApi implements INodeType {
 					}
 				}
 
-				// Add additional options for OneCall API
-				if (resource === 'alerts' || (additionalOptions && Object.keys(additionalOptions).length > 0)) {
-					queryParams.exclude = 'minutely,hourly,daily';
-					if (additionalOptions.includeUv) {
-						queryParams.exclude = queryParams.exclude.replace('minutely,hourly,daily', 'minutely,hourly');
-					}
-					if (additionalOptions.includeAirQuality) {
-						// Air quality is included by default in OneCall API
-					}
-					if (additionalOptions.includeMinuteForecast) {
-						queryParams.exclude = queryParams.exclude.replace('minutely,', '');
-					}
+				// One Call 3.0 exclude parts
+				if (resource === 'alerts' && excludeParts.length > 0) {
+					queryParams.exclude = excludeParts.join(',');
 				}
 
 				// Make the API request

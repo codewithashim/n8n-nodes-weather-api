@@ -3,11 +3,13 @@ import {
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
+	IconFile,
 } from 'n8n-workflow';
 
 export class WeatherApi implements ICredentialType {
 	name = 'weatherApi';
 	displayName = 'Weather API';
+	icon = { light: 'file:weather.svg' as IconFile, dark: 'file:weather.svg' as IconFile };
 	documentationUrl = 'https://openweathermap.org/api';
 	properties: INodeProperties[] = [
 		{
@@ -23,7 +25,7 @@ export class WeatherApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'https://api.openweathermap.org/data/2.5',
+			default: 'https://api.openweathermap.org/data/3.0',
 			description: 'Base URL for the Weather API',
 			required: true,
 		},
@@ -83,9 +85,13 @@ export class WeatherApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials.baseUrl}}',
-			url: '/weather',
+			url: '/onecall',
 			qs: {
-				q: 'London',
+				lat: 33.44,
+				lon: -94.04,
+				appid: '={{$credentials.apiKey}}',
+				units: '={{$credentials.units}}',
+				lang: '={{$credentials.language}}',
 			},
 		},
 	};
