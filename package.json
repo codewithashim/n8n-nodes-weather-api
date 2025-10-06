@@ -1,0 +1,58 @@
+{
+  "name": "n8n-nodes-weather-api",
+  "version": "1.0.0",
+  "description": "Professional Weather API node for n8n with comprehensive weather data integration",
+  "keywords": [
+    "n8n-community-node-package",
+    "weather",
+    "api",
+    "meteorology",
+    "forecast"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/codewithashim/n8n-nodes-weather-api.git",
+  "author": {
+    "name": "Ashim Rudra Paul",
+    "email": "codewithashim@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codewithashim/n8n-nodes-weather-api.git"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "npx rimraf dist && tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/WeatherApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/WeatherApi/WeatherApi.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "~8.32.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "rimraf": "^5.0.5"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
